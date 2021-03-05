@@ -1,0 +1,48 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import classification_report
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+
+dataframe = pd.read_excel('D:\pythonProject2\clinical_dataset.xlsx')
+data = dataframe.columns.values.tolist()
+df = dataframe[data[0:9]]
+df = (df - df.min()) / (df.max() - df.min())
+
+data2 = df.values
+X = data2[:, 0:9]
+y = dataframe['Status']
+Y = []
+for i in y:
+    if (i == "healthy"):
+        Y.append(0)
+    else:
+        Y.append(1)
+Y = np.array(Y)
+
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, train_size=0.9, random_state=1)
+
+ForestR2 =[]
+for i in range(100,1000,100):
+    ForestModel = RandomForestClassifier(n_estimators=i, min_samples_split=50, bootstrap=True)
+    ForestModel.fit(X_train, Y_train)
+    FRdata2 = ForestModel.predict(X_test)
+    FRreport2 = classification_report(Y_test, FRdata2)
+    ACCper2 = metrics.accuracy_score(Y_test, FRdata2)
+    ForestR2.append(ACCper2)
+    print(ACCper2)
+    print(FRreport2)
+    print(ForestR2)
+    continue
+
+# Range2 = (100, 600, 1100, 1600, 2100, 2600, 3100, 3600, 4100, 5000)
+# Range2 = (100, 300, 500, 700, 900, 1100, 1300, 1500, 1700, 2000)
+Range2 = (100, 200, 300, 400, 500, 600, 700, 800, 900)
+plt.plot(Range2, ForestR2, label='Accuracy', color='red')
+plt.xlabel("Tree Number")
+plt.ylabel("Accuracy")
+plt.legend()
+plt.show()
